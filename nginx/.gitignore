@@ -1,0 +1,8 @@
+# Nginx runtime files
+logs/*.log
+ssl/*.pem
+ssl/*.key
+
+# Keep directory structure
+!logs/.gitkeep
+!ssl/.gitkeep

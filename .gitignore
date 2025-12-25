@@ -1,0 +1,46 @@
+.env
+docs/database/
+docs/auth/
+# Ignore Python cache and virtual environment files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Ignore environment variable/config files
+.env.*
+*.env
+
+# Ignore test output, coverage, and local logs
+.coverage
+htmlcov/
+.cache/
+*.log
+
+# Ignore SQLLite and local data files
+*.sqlite3
+*.db
+db.sqlite3
+
+# Ignore backup and editor/project files
+*.swp
+*.swo
+*.bak
+*.tmp
+*.orig
+*.old
+.DS_Store
+
+# Ignore build artifacts and dist output
+build/
+dist/
+*.egg-info/
+
+# Ignore local development settings and IDE folders
+.vscode/
+.idea/
+
+# Ignore migrations (optional: uncomment if you generate locally)
+# backend/db/migrations/
+

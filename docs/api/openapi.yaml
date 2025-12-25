@@ -1,0 +1,1072 @@
+openapi: 3.0.3
+info:
+  title: Timeless Love API
+  description: Backend API for Timeless Love family social platform
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@timelesslove.com
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.timelesslove.com
+    description: Production server
+
+tags:
+  - name: auth
+    description: Authentication endpoints
+  - name: invites
+    description: Invitation management endpoints
+  - name: memories
+    description: Memory management endpoints
+  - name: storage
+    description: Storage and media access endpoints
+
+paths:
+  /api/v1/auth/register/adult:
+    post:
+      tags:
+        - auth
+      summary: Register Adult User
+      description: Register a new adult user and create family unit
+      operationId: registerAdult
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdultRegisterRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/auth/register/teen:
+    post:
+      tags:
+        - auth
+      summary: Register Teenager User
+      description: Register a new teenager user
+      operationId: registerTeen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeenRegisterRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/auth/register/grandparent:
+    post:
+      tags:
+        - auth
+      summary: Register Grandparent User
+      description: Register a new grandparent user
+      operationId: registerGrandparent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrandparentRegisterRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/auth/register/child:
+    post:
+      tags:
+        - auth
+      summary: Register Child User
+      description: Register a child user via invitation token
+      operationId: registerChild
+      parameters:
+        - name: invite_token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Invitation token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChildRegisterRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/auth/provision/child:
+    post:
+      tags:
+        - auth
+      summary: Provision Child Account
+      description: Create a child account with generated credentials (Adult only)
+      operationId: provisionChild
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChildProvisionRequest'
+      responses:
+        '201':
+          description: Child account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildProvisionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/auth/register/pet:
+    post:
+      tags:
+        - auth
+      summary: Register Pet Profile
+      description: Create a pet profile (Adult only)
+      operationId: registerPet
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetRegisterRequest'
+      responses:
+        '201':
+          description: Pet profile created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetRegisterResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/auth/login:
+    post:
+      tags:
+        - auth
+      summary: Login
+      description: Authenticate with email and password
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/auth/refresh:
+    post:
+      tags:
+        - auth
+      summary: Refresh Token
+      description: Refresh access token using refresh token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/invites:
+    post:
+      tags:
+        - invites
+      summary: Create Invitation
+      description: Create a new invitation (Adult only)
+      operationId: createInvite
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInviteRequest'
+      responses:
+        '201':
+          description: Invitation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/invites/{token}:
+    get:
+      tags:
+        - invites
+      summary: Validate Invitation
+      description: Validate an invitation token
+      operationId: validateInvite
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Invitation token
+      responses:
+        '200':
+          description: Invitation validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateInviteResponse'
+
+  /api/v1/invites/{token}/accept:
+    post:
+      tags:
+        - invites
+      summary: Accept Invitation
+      description: Accept an invitation and create user account
+      operationId: acceptInvite
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Invitation token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptInviteRequest'
+      responses:
+        '200':
+          description: Invitation accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/memories:
+    post:
+      tags:
+        - memories
+      summary: Create Memory
+      description: Create a new memory with media references
+      operationId: createMemory
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMemoryRequest'
+      responses:
+        '201':
+          description: Memory created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    get:
+      tags:
+        - memories
+      summary: List Memories
+      description: List memories for the user's family unit
+      operationId: listMemories
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, published, archived]
+      responses:
+        '200':
+          description: List of memories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MemoryResponse'
+
+  /api/v1/memories/{memory_id}:
+    get:
+      tags:
+        - memories
+      summary: Get Memory
+      description: Get memory details with associated media
+      operationId: getMemory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: memory_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Memory details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    put:
+      tags:
+        - memories
+      summary: Update Memory
+      description: Update memory metadata
+      operationId: updateMemory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: memory_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMemoryRequest'
+      responses:
+        '200':
+          description: Memory updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    delete:
+      tags:
+        - memories
+      summary: Delete Memory
+      description: Delete a memory (cascades to media)
+      operationId: deleteMemory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: memory_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Memory deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/memories/{memory_id}/media:
+    post:
+      tags:
+        - memories
+      summary: Add Media to Memory
+      description: Add media to an existing memory
+      operationId: addMediaToMemory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: memory_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddMediaRequest'
+      responses:
+        '201':
+          description: Media added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/memories/{memory_id}/media/{media_id}:
+    delete:
+      tags:
+        - memories
+      summary: Remove Media from Memory
+      description: Remove media from a memory
+      operationId: removeMediaFromMemory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: memory_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: media_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Media removed
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/storage/upload-url:
+    post:
+      tags:
+        - storage
+      summary: Generate Upload URL
+      description: Generate signed URL for uploading media to Supabase Storage
+      operationId: generateUploadUrl
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadUrlRequest'
+      responses:
+        '200':
+          description: Upload URL generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadUrlResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/storage/access-url:
+    get:
+      tags:
+        - storage
+      summary: Generate Access URL
+      description: Generate signed URL for accessing media from Supabase Storage
+      operationId: generateAccessUrl
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: storage_path
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: expires_in
+          in: query
+          schema:
+            type: integer
+            default: 3600
+      responses:
+        '200':
+          description: Access URL generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessUrlResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/storage/media/{media_id}/url:
+    get:
+      tags:
+        - storage
+      summary: Get Media URL
+      description: Get signed URL for a specific media file by media ID
+      operationId: getMediaUrl
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: media_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: expires_in
+          in: query
+          schema:
+            type: integer
+            default: 3600
+      responses:
+        '200':
+          description: Media URL generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessUrlResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AdultRegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - display_name
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        family_name:
+          type: string
+          maxLength: 255
+
+    TeenRegisterRequest:
+      $ref: '#/components/schemas/AdultRegisterRequest'
+
+    GrandparentRegisterRequest:
+      $ref: '#/components/schemas/AdultRegisterRequest'
+
+    ChildRegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - display_name
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        display_name:
+          type: string
+          minLength: 1
+
+    ChildProvisionRequest:
+      type: object
+      required:
+        - display_name
+      properties:
+        display_name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+
+    PetRegisterRequest:
+      type: object
+      required:
+        - display_name
+      properties:
+        display_name:
+          type: string
+          minLength: 1
+        avatar_url:
+          type: string
+          format: uri
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+
+    RegisterResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [adult, teen, child, grandparent, pet]
+        family_unit_id:
+          type: string
+          format: uuid
+        tokens:
+          $ref: '#/components/schemas/TokenResponse'
+
+    TokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        token_type:
+          type: string
+          default: bearer
+        expires_in:
+          type: integer
+          description: Seconds until access token expires
+
+    ChildProvisionResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        password:
+          type: string
+        display_name:
+          type: string
+        family_unit_id:
+          type: string
+          format: uuid
+        message:
+          type: string
+
+    PetRegisterResponse:
+      type: object
+      properties:
+        pet_id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+        family_unit_id:
+          type: string
+          format: uuid
+        message:
+          type: string
+
+    CreateInviteRequest:
+      type: object
+      required:
+        - email
+        - role
+      properties:
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [adult, teen, child, grandparent]
+
+    InviteResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+        token:
+          type: string
+        invite_link:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [pending, accepted, expired, revoked]
+        created_at:
+          type: string
+          format: date-time
+
+    ValidateInviteResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        invite:
+          $ref: '#/components/schemas/InviteResponse'
+        message:
+          type: string
+
+    AcceptInviteRequest:
+      type: object
+      required:
+        - email
+        - password
+        - display_name
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        display_name:
+          type: string
+          minLength: 1
+
+    CreateMemoryRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        memory_date:
+          type: string
+          format: date
+        location:
+          type: string
+          maxLength: 255
+        tags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [draft, published, archived]
+          default: draft
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/MediaReference'
+
+    MediaReference:
+      type: object
+      required:
+        - storage_path
+        - file_name
+        - mime_type
+        - file_size
+      properties:
+        storage_path:
+          type: string
+        file_name:
+          type: string
+        mime_type:
+          type: string
+        file_size:
+          type: integer
+          minimum: 1
+
+    UpdateMemoryRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        memory_date:
+          type: string
+          format: date
+        location:
+          type: string
+          maxLength: 255
+        tags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [draft, published, archived]
+
+    MemoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        family_unit_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        memory_date:
+          type: string
+          format: date
+        location:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        modified_by:
+          type: string
+          format: uuid
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/MediaResponse'
+
+    MediaResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        memory_id:
+          type: string
+          format: uuid
+        storage_path:
+          type: string
+        storage_bucket:
+          type: string
+        file_name:
+          type: string
+        mime_type:
+          type: string
+        file_size:
+          type: integer
+        width:
+          type: integer
+        height:
+          type: integer
+        duration:
+          type: integer
+        thumbnail_path:
+          type: string
+        processing_status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AddMediaRequest:
+      type: object
+      required:
+        - storage_path
+        - file_name
+        - mime_type
+        - file_size
+      properties:
+        storage_path:
+          type: string
+        file_name:
+          type: string
+        mime_type:
+          type: string
+        file_size:
+          type: integer
+          minimum: 1
+
+    UploadUrlRequest:
+      type: object
+      required:
+        - memory_id
+        - file_name
+        - mime_type
+      properties:
+        memory_id:
+          type: string
+          format: uuid
+        file_name:
+          type: string
+        mime_type:
+          type: string
+
+    UploadUrlResponse:
+      type: object
+      properties:
+        upload_url:
+          type: string
+          format: uri
+        storage_path:
+          type: string
+        expires_in:
+          type: integer
+
+    AccessUrlResponse:
+      type: object
+      properties:
+        access_url:
+          type: string
+          format: uri
+        expires_in:
+          type: integer
+
+    Error:
+      type: object
+      properties:
+        detail:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
