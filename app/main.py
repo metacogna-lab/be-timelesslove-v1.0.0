@@ -64,3 +64,12 @@ async def health():
     """Health check endpoint."""
     return {"status": "healthy"}
 
+
+# INSERT_YOUR_CODE
+if __name__ == "__main__":
+    import os
+    os.system("gunicorn app.main:app --bind 127.0.0.1:8000 --reload --worker-class uvicorn.workers.UvicornWorker")
+
+
+
+
