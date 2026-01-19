@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  backend:
+    container_name: timelesslove-backend-dev
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env.local
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENVIRONMENT=development
+      - DEBUG=true
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount source code for hot-reload
+      - ./backend/app:/app/app
+      - ./backend/adapters:/app/adapters
+      - ./backend/tests:/app/tests
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+    networks:
+      - timelesslove-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    container_name: timelesslove-frontend-dev
+    build:
+      context: ./backend/demo-frontend
+      dockerfile: Dockerfile.dev
+    env_file:
+      - ./backend/demo-frontend/.env.local
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount source code for hot-reload
+      - ./backend/demo-frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - timelesslove-network
+
+networks:
+  timelesslove-network:
+    driver: bridge
+

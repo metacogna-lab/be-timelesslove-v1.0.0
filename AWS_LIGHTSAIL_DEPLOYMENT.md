@@ -157,7 +157,7 @@ tunnel: <tunnel-id-from-above>
 credentials-file: /home/ubuntu/.cloudflared/<tunnel-id-from-above>.json
 
 ingress:
-  - hostname: api.yourdomain.com
+  - hostname: api.timelesslove.ai
     service: http://localhost:8000
   - service: http_status:404
 ```
@@ -178,13 +178,13 @@ sudo systemctl enable cloudflared
 sudo systemctl status cloudflared
 ```
 
-Your API will now be accessible at `https://api.yourdomain.com` with automatic SSL (using Cloudflare's certs)!
+Your API will now be accessible at `https://api.timelesslove.ai` with automatic SSL (using Cloudflare's certs)!
 
 ### 9. Verify Deployment
 
 ```bash
 docker ps
-curl -i https://api.yourdomain.com/health
+curl -i https://api.timelesslove.ai/health
 ./deployment/logs.sh
 ```
 
@@ -523,8 +523,8 @@ docker-compose -f docker-compose.production.yml logs > debug.log
 
 After deploying the backend:
 
-1. ✅ Verify health endpoint: `https://api.yourdomain.com/health`
-2. ✅ Test API documentation: `https://api.yourdomain.com/docs` (if DEBUG=true)
+1. ✅ Verify health endpoint: `https://api.timelesslove.ai/health`
+2. ✅ Test API documentation: `https://api.timelesslove.ai/docs` (if DEBUG=true)
 3. ✅ Update frontend `VITE_API_BASE_URL` to point to your domain
 4. ✅ Test authentication flow end-to-end
 5. ✅ Set up monitoring (UptimeRobot, Datadog, etc.)
