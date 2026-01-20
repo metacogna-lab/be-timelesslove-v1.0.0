@@ -46,6 +46,7 @@ app.include_router(memories.router, prefix=f"/api/{settings.api_version}/memorie
 app.include_router(storage.router, prefix=f"/api/{settings.api_version}/storage", tags=["storage"])
 app.include_router(feed.router, prefix=f"/api/{settings.api_version}", tags=[])
 app.include_router(health_router.router, prefix=f"/api/{settings.api_version}/health", tags=["health"])
+app.include_router(health_router.router, prefix="/api/health", tags=["health"])
 
 # Include adapter routers (frontend-facing adapters with transformation layer)
 app.include_router(auth_adapter, prefix=f"/adaptor/{settings.api_version}/auth", tags=["adaptor-auth"])
