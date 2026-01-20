@@ -17,9 +17,9 @@ RUN apt-get update && apt-get install -y \
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 RUN chmod +x /usr/local/bin/uv
 
-# Copy requirements and install Python dependencies to user directory using uv
+# Copy requirements and install Python dependencies system-wide using uv
 COPY requirements.txt .
-RUN uv pip install --system --no-cache --user -r requirements.txt
+RUN uv pip install --system --no-cache -r requirements.txt
 
 # Stage 2: Runtime - Minimal production image
 FROM python:3.13-slim
@@ -33,13 +33,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy installed Python packages from builder stage
-COPY --from=builder /root/.local /root/.local
+COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application code
 COPY . .
 
-# Ensure scripts in .local are available in PATH
-ENV PATH=/root/.local/bin:$PATH
+# Ensure scripts in /usr/local/bin are available in PATH
+ENV PATH=/usr/local/bin:$PATH
 
 # Create non-root user for security
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
